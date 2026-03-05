@@ -6,6 +6,7 @@ import com.example.banking.transaction.dto.RegisterRequest;
 import com.example.banking.transaction.entity.User;
 import com.example.banking.transaction.service.UserService;
 import jakarta.validation.Valid;
+import org.aspectj.weaver.patterns.IToken;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +28,8 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<String> login (@Valid @RequestBody LoginRequest request){
-        String response= userService.login(request);
-        return ResponseEntity.ok(response);
+        String token= userService.login(request);
+        return ResponseEntity.ok(token);
 
     }
 
