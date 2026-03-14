@@ -1,0 +1,38 @@
+package com.example.banking.transaction.controller;
+
+import com.example.banking.transaction.dto.CreateAccountRequest;
+import com.example.banking.transaction.dto.DepositRequest;
+import com.example.banking.transaction.entity.Accounts;
+import com.example.banking.transaction.service.AccountService;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+
+
+@RestController
+@RequestMapping("/api/admin/accounts")
+public class AccountController {
+
+    private final AccountService accountService;
+
+    public AccountController (AccountService accountService){
+        this.accountService=accountService;
+
+    }
+    @PostMapping("/create")
+    public Accounts createAccount(@RequestBody CreateAccountRequest request){
+        return accountService.createAccount(
+                request.getUserId(),
+                request.getAccountType(),
+                request.getInitialBalance()
+        );
+
+    }
+
+    @PostMapping("/{accountId}/deposit")
+    public Accounts deposit(@PathVariable Long accountId,
+                            @RequestParam("amount") BigDecimal amount){
+        return accountService.deposit(accountId,amount);
+    }
+
+}
