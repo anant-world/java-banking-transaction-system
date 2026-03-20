@@ -49,6 +49,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 if (jwtUtil.validateToken(token)) {
 
+                String role= jwtUtil.extractRole(token);
+
+                List<SimpleGrantedAuthority> authorities= List.of(new SimpleGrantedAuthority(role));
 
 
 
@@ -63,6 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
                             .setAuthentication(authToken);
                     System.out.println("JWT FILTER EXECUTED");
                     System.out.println("Token: " + token);
+                    System.out.println("Role from token " +role);
                 }
             }
         }

@@ -1,12 +1,16 @@
 package com.example.banking.transaction.controller;
 
+import com.example.banking.transaction.dto.BalanceResponse;
 import com.example.banking.transaction.dto.CreateAccountRequest;
 import com.example.banking.transaction.dto.DepositRequest;
+import com.example.banking.transaction.dto.TransactionResponse;
 import com.example.banking.transaction.entity.Accounts;
+import com.example.banking.transaction.entity.Transaction;
 import com.example.banking.transaction.service.AccountService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @RestController
@@ -33,6 +37,16 @@ public class AccountController {
     public Accounts deposit(@PathVariable Long accountId,
                             @RequestParam("amount") BigDecimal amount){
         return accountService.deposit(accountId,amount);
+    }
+
+    @GetMapping("/{accountId}/balance")
+    public BalanceResponse getBalance(@PathVariable Long accountId){
+        return accountService.getBalance(accountId);
+    }
+
+    @GetMapping("/{accountId}/statement")
+    public List<TransactionResponse> getStatement(@PathVariable Long accountId){
+        return accountService.getStatement(accountId);
     }
 
 }
