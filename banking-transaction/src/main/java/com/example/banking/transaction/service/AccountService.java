@@ -2,6 +2,7 @@ package com.example.banking.transaction.service;
 
 import com.example.banking.transaction.dto.BalanceResponse;
 import com.example.banking.transaction.dto.TransactionResponse;
+import com.example.banking.transaction.dto.WithdrawRequest;
 import com.example.banking.transaction.entity.Accounts;
 import com.example.banking.transaction.entity.CurrentAccount;
 import com.example.banking.transaction.entity.SavingsAccount;
@@ -64,7 +65,7 @@ public class AccountService {
         account.setBalance(account.getBalance().add(amount));
 
         Transaction txn= new Transaction();
-        txn.setAccountId(accountId);
+        txn.setAccount(account);
         txn.setAmount(amount);
         txn.setType("DEPOSIT");
         txn.setTimeStamp(LocalDateTime.now());
@@ -95,5 +96,27 @@ public class AccountService {
                         txn.getTimeStamp()
                 )).toList();
 
+
+
+    }
+    public void withdraw(WithdrawRequest request){
+        Accounts accounts= accountRepository.findById(request.getAccountId()).orElseThrow(()-> new RuntimeException("Account not found"));
+
+        BigDecimal currentBalance=accounts.getBalance();
+
+        if (currentBalance.compareTo(request.getAmount())<0){
+            throw new RuntimeException("Insufficient balance");
+        }
+//        deduct amount
+        accounts.setBalance(currentBalance.subtract(request.getAmount()));
+        accountRepository.save(accounts);
+
+        Transaction txn = new Transaction();
+        txn.setAccount(accounts);
+        txn.setAmount(request.getAmount());
+        txn.setType("WITHDRAW");
+        txn.setTimeStamp(LocalDateTime.now());
+
+        transactionRepository.save(txn);
     }
 }

@@ -1,9 +1,6 @@
 package com.example.banking.transaction.controller;
 
-import com.example.banking.transaction.dto.BalanceResponse;
-import com.example.banking.transaction.dto.CreateAccountRequest;
-import com.example.banking.transaction.dto.DepositRequest;
-import com.example.banking.transaction.dto.TransactionResponse;
+import com.example.banking.transaction.dto.*;
 import com.example.banking.transaction.entity.Accounts;
 import com.example.banking.transaction.entity.Transaction;
 import com.example.banking.transaction.service.AccountService;
@@ -47,6 +44,12 @@ public class AccountController {
     @GetMapping("/{accountId}/statement")
     public List<TransactionResponse> getStatement(@PathVariable Long accountId){
         return accountService.getStatement(accountId);
+    }
+
+    @PostMapping("/withdraw")
+    public String withdraw(@RequestBody WithdrawRequest request){
+        accountService.withdraw(request);
+        return "Amount withdrawn successfully";
     }
 
 }
