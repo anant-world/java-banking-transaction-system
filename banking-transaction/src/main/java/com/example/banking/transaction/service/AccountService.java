@@ -2,6 +2,7 @@ package com.example.banking.transaction.service;
 
 import com.example.banking.transaction.dto.BalanceResponse;
 import com.example.banking.transaction.dto.TransactionResponse;
+import com.example.banking.transaction.dto.TransferRequest;
 import com.example.banking.transaction.dto.WithdrawRequest;
 import com.example.banking.transaction.entity.Accounts;
 import com.example.banking.transaction.entity.CurrentAccount;
@@ -10,6 +11,7 @@ import com.example.banking.transaction.entity.Transaction;
 import com.example.banking.transaction.repository.AccountRepository;
 import com.example.banking.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -99,12 +101,13 @@ public class AccountService {
 
 
     }
+    @Transactional
     public void withdraw(WithdrawRequest request){
         Accounts accounts= accountRepository.findById(request.getAccountId()).orElseThrow(()-> new RuntimeException("Account not found"));
 
         BigDecimal currentBalance=accounts.getBalance();
 
-        if (currentBalance.compareTo(request.getAmount())<0){
+        if (currentBalance.compareTo(request.getAmount())<=0){
             throw new RuntimeException("Insufficient balance");
         }
 //        deduct amount
@@ -118,5 +121,41 @@ public class AccountService {
         txn.setTimeStamp(LocalDateTime.now());
 
         transactionRepository.save(txn);
+    }
+    @Transactional
+    public void transfer(TransferRequest request){
+        Accounts fromAccount= accountRepository.findById(request.getFromAccountId()).orElseThrow(()->
+                new RuntimeException("Sender account not found"));
+
+        Accounts toAccount= accountRepository.findById(request.getToAccountId()).orElseThrow(()->
+                new RuntimeException("Reciever account not found"));
+
+        //Balance check
+
+        if (fromAccount.getBalance().compareTo(request.getAmount())<=0){
+            throw new RuntimeException("Insufficient balance");
+        }
+
+//        deduct from sender
+        fromAccount.setBalance(fromAccount.getBalance().subtract(request.getAmount()));
+
+//        added to the reciever
+        toAccount.setBalance(toAccount.getBalance().add(request.getAmount()));
+
+        Transaction debitTxn= new Transaction();
+        debitTxn.setAccount(fromAccount);
+        debitTxn.setAmount(request.getAmount());
+        debitTxn.setType("Transfer out");
+        debitTxn.setTimeStamp(LocalDateTime.now());
+
+
+        Transaction creditTxn = new Transaction();
+        creditTxn.setAccount(toAccount);
+        creditTxn.setAmount(request.getAmount());
+        creditTxn.setType("Transfer In");
+        creditTxn.setTimeStamp(LocalDateTime.now());
+
+        transactionRepository.save(debitTxn);
+        transactionRepository.save(creditTxn);
     }
 }

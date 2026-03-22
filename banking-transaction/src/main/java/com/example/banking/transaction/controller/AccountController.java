@@ -51,5 +51,10 @@ public class AccountController {
         accountService.withdraw(request);
         return "Amount withdrawn successfully";
     }
+    @PostMapping("/transfer")
+    public String transfer(@RequestBody TransferRequest request){
+        accountService.transfer(request);
+        return "Transfer successfull";
+    }
 
 }
